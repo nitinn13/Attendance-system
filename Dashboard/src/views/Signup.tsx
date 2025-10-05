@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Mail, Lock, User, UserCircle } from 'lucide-react';
+import { BACKEND_API } from '../api/config';
 
 const Signup = () => {
   const [name, setName] = useState('');
@@ -10,14 +11,14 @@ const Signup = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
-  async function handleSubmit(e) {
+  async function handleSubmit(e: any) {
     e.preventDefault();
     setIsLoading(true);
     setError('');
     setSuccess(false);
 
     try {
-      const res = await fetch('http://localhost:3000/auth/register', {
+      const res = await fetch(`${BACKEND_API}/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

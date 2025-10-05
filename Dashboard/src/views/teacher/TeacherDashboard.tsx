@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { teacherApi } from "../../api/teacherApi";
 import { useNavigate } from "react-router-dom";
+import { BACKEND_API } from "../../api/config";
 
 interface QrSession {
   sessionId: string;
@@ -46,19 +47,21 @@ export default function TeacherDashboard() {
       try {
         setLoading(true);
         setError(null);
-        
+
         const token = localStorage.getItem('token');
         if (!token) {
           setError("No authentication token found");
           setLoading(false);
           return;
         }
+        console.log(token);
 
-        const response = await fetch('http://localhost:3000/teacher/my-classes', {
+        const response = await fetch(`${BACKEND_API}/teacher/my-classes`, {
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`,
           },
+          credentials: "include",
         });
 
         if (!response.ok) {
@@ -67,7 +70,7 @@ export default function TeacherDashboard() {
 
         const data = await response.json();
         console.log("API Response:", data); // Debug log
-        
+
         // Handle response format: { total: number, classes: Class[] }
         if (data && Array.isArray(data.classes)) {
           setClasses(data.classes);
@@ -87,7 +90,7 @@ export default function TeacherDashboard() {
         setLoading(false);
       }
     }
-    
+
     loadClasses();
   }, []);
 
@@ -102,12 +105,13 @@ export default function TeacherDashboard() {
       }
 
       // Open attendance first
-      const attendanceResponse = await fetch('http://localhost:3000/teacher/open-attendance', {
+      const attendanceResponse = await fetch(`${BACKEND_API}/teacher/open-attendance`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
+        credentials: "include",
         body: JSON.stringify({ classId: selected }),
       });
 
@@ -122,7 +126,7 @@ export default function TeacherDashboard() {
       setTimeLeft(30);
 
       // Update local state to reflect attendance is open
-      setClasses(prev => prev.map(cls => 
+      setClasses(prev => prev.map(cls =>
         cls.id === selected ? { ...cls, isAttendanceOpen: true } : cls
       ));
     } catch (err) {
@@ -134,18 +138,18 @@ export default function TeacherDashboard() {
   // 🔹 Stop session
   const handleEndQr = async () => {
     if (!qrSession) return;
-    
+
     const classId = qrSession.classId;
-    
+
     try {
       const token = localStorage.getItem('token');
-      
+
       // Stop QR session
       await teacherApi.stopSession(qrSession.sessionId);
 
       // Close attendance
       if (token) {
-        const attendanceResponse = await fetch('http://localhost:3000/teacher/close-attendance', {
+        const attendanceResponse = await fetch(`${BACKEND_API}/teacher/close-attendance`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -160,7 +164,7 @@ export default function TeacherDashboard() {
         }
 
         // Update local state to reflect attendance is closed
-        setClasses(prev => prev.map(cls => 
+        setClasses(prev => prev.map(cls =>
           cls.id === classId ? { ...cls, isAttendanceOpen: false } : cls
         ));
       }
@@ -322,17 +326,15 @@ export default function TeacherDashboard() {
                 <img
                   src={qrSession.prevData}
                   alt="Old QR"
-                  className={`absolute inset-0 w-full h-full object-contain transition-all duration-300 ${
-                    fade ? "opacity-0 scale-95" : "opacity-100 scale-100"
-                  }`}
+                  className={`absolute inset-0 w-full h-full object-contain transition-all duration-300 ${fade ? "opacity-0 scale-95" : "opacity-100 scale-100"
+                    }`}
                 />
               )}
               <img
                 src={qrSession.qrData}
                 alt="QR Code"
-                className={`absolute inset-0 w-full h-full object-contain transition-all duration-300 ${
-                  fade ? "opacity-100 scale-100" : "opacity-0 scale-95"
-                }`}
+                className={`absolute inset-0 w-full h-full object-contain transition-all duration-300 ${fade ? "opacity-100 scale-100" : "opacity-0 scale-95"
+                  }`}
               />
             </div>
 

@@ -2,15 +2,16 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { Mail, Lock, LogIn } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { BACKEND_API } from '../api/config'
 
-const Signup = () => {
+const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  async function handleSubmit(e) {
+  async function handleSubmit(e : any) {
     e.preventDefault();
     setIsLoading(true);
     setError('');
@@ -19,7 +20,7 @@ const Signup = () => {
     const prevUuid = localStorage.getItem('uuid');
 
     try {
-      const res = await axios.post('http://localhost:3000/auth/login', {
+      const res = await axios.post(`${BACKEND_API}/auth/login`, {
         email,
         password,
         uuid: prevUuid,
@@ -156,4 +157,4 @@ const Signup = () => {
   );
 };
 
-export default Signup;
+export default Login;

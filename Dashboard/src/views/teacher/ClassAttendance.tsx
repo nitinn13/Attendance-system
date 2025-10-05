@@ -1,6 +1,7 @@
 // src/pages/teacher/ClassAttendance.tsx
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { BACKEND_API } from '../../api/config';
 
 interface AttendanceRecord {
     userId: number;
@@ -44,12 +45,13 @@ export default function ClassAttendance() {
             }
 
             // Fetch attendance data
-            const response = await fetch(`http://localhost:3000/teacher/attendance?classId=${classId}`, {
+            const response = await fetch(`${BACKEND_API}/teacher/attendance?classId=${classId}`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${token}`
-                }
+                },
+                credentials: "include",
             });
 
             if (!response.ok) {
@@ -73,11 +75,12 @@ export default function ClassAttendance() {
             setAttendance(data);
 
             // Fetch class info
-            const classResponse = await fetch('http://localhost:3000/teacher/my-classes', {
+            const classResponse = await fetch(`${BACKEND_API}/teacher/my-classes`, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`,
                 },
+                credentials: "include",
             });
 
             if (classResponse.ok) {

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { BookOpen, Users, Calendar, Plus, Radio, RadioIcon } from 'lucide-react';
+import { BACKEND_API } from '../../api/config';
 
 const TeacherClasses = () => {
   const [classes, setClasses] = useState([]);
@@ -10,13 +11,14 @@ const TeacherClasses = () => {
   async function getTeacherClasses() {
     setIsLoading(true);
     setError('');
-    
+
     try {
-      const response = await fetch('http://localhost:3000/teacher/my-classes', {
+      const response = await fetch(`${BACKEND_API}/teacher/my-classes`, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
         },
+        credentials: "include",
       });
 
       if (response.ok) {
@@ -39,7 +41,7 @@ const TeacherClasses = () => {
     getTeacherClasses();
   }, []);
 
-  const formatDate = (dateString) => {
+  const formatDate = (dateString: any) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
@@ -60,7 +62,7 @@ const TeacherClasses = () => {
                 Manage your classes and track attendance
               </p>
             </div>
-           
+
           </div>
         </div>
       </div>

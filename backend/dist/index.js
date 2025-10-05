@@ -8,7 +8,11 @@ import adminRouter from "./routes/admin.js";
 import teacherRouter from "./routes/teacher.js";
 import studentRouter from "./routes/student.js";
 const app = express();
-app.use(cors());
+app.use(cors({
+    origin: "https://7eae7ebc942c.ngrok-free.app",
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization", "Origin"],
+}));
 app.use(express.json());
 const PORT = process.env.PORT || 3000;
 app.use(express.json());

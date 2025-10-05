@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { studentApi } from "../../api/studentApi";
 import QrScanner from "../../types/QrScanner";
+import { BACKEND_API } from "../../api/config";
 
 interface Class {
   id: number;
@@ -26,11 +27,12 @@ export default function Timetable() {
 
   // 🔹 Load student classes from backend
   useEffect(() => {
+    
     async function loadClasses() {
       try {
         setLoading(true);
         setError(null);
-        
+
         const token = localStorage.getItem('token');
         if (!token) {
           setError("No authentication token found");
@@ -38,11 +40,12 @@ export default function Timetable() {
           return;
         }
 
-        const response = await fetch('http://localhost:3000/student/my-classes', {
+        const response = await fetch(`${BACKEND_API}/student/my-classes`, {
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`,
           },
+          credentials: "include",
         });
 
         if (!response.ok) {
@@ -56,7 +59,7 @@ export default function Timetable() {
 
         const data = await response.json();
         console.log('Student classes data:', data);
-        
+
         // Handle response format: { total: number, classes: Class[] }
         if (data && Array.isArray(data.classes)) {
           setClasses(data.classes);
@@ -75,7 +78,7 @@ export default function Timetable() {
         setLoading(false);
       }
     }
-    
+
     loadClasses();
   }, []);
 
@@ -98,7 +101,7 @@ export default function Timetable() {
     setScanned(true);
 
     try {
-      const parsed = JSON.parse(result); 
+      const parsed = JSON.parse(result);
       setLastResult({ raw: result, parsed });
       setMessage("Verifying QR code...");
       console.log('Parsed:', parsed.classId);
@@ -114,12 +117,13 @@ export default function Timetable() {
       }
 
       // Mark attendance via API
-      const response = await fetch('http://localhost:3000/student/mark-attendance', {
+      const response = await fetch(`${BACKEND_API}/student/mark-attendance`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
+        credentials: "include",
         body: JSON.stringify({ classId: selectedClass.id }),
       });
 
@@ -147,7 +151,7 @@ export default function Timetable() {
       const errorMessage = err.message || err.response?.data?.message || "Failed to mark attendance";
       setMessage("❌ " + errorMessage);
       setScanned(false); // allow retry
-      
+
       // Auto-hide error after 3 seconds but keep modal open
       setTimeout(() => {
         setMessage("");
@@ -282,13 +286,12 @@ export default function Timetable() {
 
             {/* Status message */}
             {message && (
-              <div className={`text-center p-3 rounded-lg mb-4 ${
-                message.includes("✅")
-                  ? "bg-green-50 text-green-700 border border-green-200"
-                  : message.includes("❌")
+              <div className={`text-center p-3 rounded-lg mb-4 ${message.includes("✅")
+                ? "bg-green-50 text-green-700 border border-green-200"
+                : message.includes("❌")
                   ? "bg-red-50 text-red-700 border border-red-200"
                   : "bg-blue-50 text-blue-700 border border-blue-200"
-              }`}>
+                }`}>
                 <p className="font-medium">{message}</p>
               </div>
             )}
